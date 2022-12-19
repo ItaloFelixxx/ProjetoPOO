@@ -14,10 +14,10 @@ public class ClienteDAO {
 	private String BUS = "SELECT * FROM cliente WHERE cpf = ?";
 	private String INS = "INSERT INTO cliente(cpf,nome, telefone, email, logradouro,numero, complemento, estado ,cidade ,bairro , cep) VALUES (?,?,?,?,?,?,?,?,?,?,?) "; 
 	private String DEL = "DELETE FROM cliente WHERE cpf = ?";
-	private String ALT = "UPDATE cliente cpf = ?, nome = ?, telefone = ?, email = ?, logradouro = ?,numero = ?, complemento = ?, estado = ?,cidade = ?,bairro = ?, cep = ? where cpf = ?";
+	private String ALT = "UPDATE cliente set cpf = ?, nome = ?, telefone = ?, email = ?, logradouro = ?,numero = ?, complemento = ?, estado = ?,cidade = ?,bairro = ?, cep = ? where cpf = ?";
 	
 	public ClienteDAO() {
-		c = new Conexao("jdbc:postgresql://localhost:5432/mercearia","postgres","30042003");
+		c = new Conexao();
 	}
 	
 	public Cliente buscar(String cpf) {
@@ -38,7 +38,7 @@ public class ClienteDAO {
 		 return cliente;
 	}
 
-	public void alterar(Cliente cliente) {
+	public void alterar(Cliente cliente, String cpfAntigo) {
 		try {
 			c.conectar();
 			PreparedStatement instrucao = c.getConexao().prepareStatement(ALT);
@@ -53,7 +53,7 @@ public class ClienteDAO {
 			instrucao.setString(9, cliente.getCidade());
 			instrucao.setString(10, cliente.getBairro());
 			instrucao.setString(11, cliente.getCep());
-			instrucao.setString(12, cliente.getCpf());
+			instrucao.setString(12, cpfAntigo);
 			instrucao.execute();
 			c.desconectar();
 		}catch(Exception e){

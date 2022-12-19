@@ -19,14 +19,14 @@ public class EstoqueDAO {
 	private Conexao c;
 	
 	public EstoqueDAO() {
-		c = new Conexao("jdbc:postgresql://localhost:5432/mercearia","postgres","30042003");
+		c = new Conexao();
 	}
 	
-	public void alterarQtd(int codigo, int qtdAtual, int qtdVendida) {
+	public void saidaEstoque(int codigo, int qtdAtual, int qtdVendida) {
 		try {
 			c.conectar();
 			PreparedStatement instrucao = c.getConexao().prepareStatement(ALTQTD);
-			instrucao.setInt(1, (qtdAtual-qtdVendida));
+			instrucao.setInt(1, (qtdAtual - qtdVendida));
 			instrucao.setInt(2, codigo);
 			instrucao.execute();
 			c.desconectar();
@@ -34,6 +34,21 @@ public class EstoqueDAO {
 			System.out.println("Erro na alteração"+e. getMessage());
 		}
 	}
+	
+	public void entradaEstoque(int codigo, int qtdAtual, int qtdAdquirida) {
+		try {
+			c.conectar();
+			PreparedStatement instrucao = c.getConexao().prepareStatement(ALTQTD);
+			instrucao.setInt(1, (qtdAtual + qtdAdquirida));
+			instrucao.setInt(2, codigo);
+			instrucao.execute();
+			c.desconectar();
+		}catch(Exception e){
+			System.out.println("Erro na alteração"+e. getMessage());
+		}
+	}
+
+	
 
 
 	public Estoque buscar(int codigo) {
@@ -57,11 +72,11 @@ public class EstoqueDAO {
 		 return estoque;
 	}
 	
-	public void excluir(String codigo) {
+	public void excluir(int codigo) {
 		try {
 			c.conectar();
 			PreparedStatement instrucao = c.getConexao().prepareStatement(DEL);
-			instrucao.setString(1, codigo);
+			instrucao.setInt(1, codigo);
 			instrucao.execute();
 			c.desconectar();
 		}catch(Exception e) {
@@ -85,7 +100,7 @@ public class EstoqueDAO {
 		}
 	}
 	
-	public void alterar(Estoque estoque) {
+	public void alterar(Estoque estoque, int codigoAntigo) {
 		try {
 			c.conectar();
 			PreparedStatement instrucao = c.getConexao().prepareStatement(ALT);
@@ -94,7 +109,7 @@ public class EstoqueDAO {
 			instrucao.setFloat(3, estoque.getPreco());
 			instrucao.setString(4, estoque.getFornecedor().getCnpj());
 			instrucao.setInt(5, estoque.getQtdEstoque());
-			instrucao.setInt(6, estoque.getCodigo());
+			instrucao.setInt(6, codigoAntigo);
 			instrucao.execute();
 			c.desconectar();
 		}catch(Exception e){

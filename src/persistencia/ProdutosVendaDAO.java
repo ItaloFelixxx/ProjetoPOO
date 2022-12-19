@@ -5,20 +5,51 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 
-import dominio.Cliente;
 import dominio.Estoque;
-import dominio.Fornecedor;
 import dominio.ProdutoVenda;
-import dominio.Venda;
 
 public class ProdutosVendaDAO {
 	private Conexao c;
 	private String REL = "SELECT * FROM Produtos_venda";
 	private String INS = "INSERT INTO Produtos_venda(fk_codigo, fk_numero, quantidade, subtotal) VALUES (?,?,?,?)"; 
+	private String DEL = "DELETE FROM Produtos_venda WHERE fk_codigo = ? AND fk_numero = ? ";
+	private String BUS = "SELECT * FROM Produtos_venda WHERE fk_codigo = ? AND fk_numero = ?";
 
 
 	public ProdutosVendaDAO() {
-		c = new Conexao("jdbc:postgresql://localhost:5432/mercearia","postgres","30042003");
+		c = new Conexao();
+	}
+	
+	public ProdutoVenda buscar(int fk_codigo, int fk_numero) {
+		ProdutoVenda pv = null;
+		 try {
+			 c.conectar();
+			 PreparedStatement instrucao = c.getConexao().prepareStatement(BUS);
+			 instrucao.setInt(1, fk_codigo);
+			 instrucao.setInt(2, fk_numero);
+			 ResultSet rs = instrucao.executeQuery();
+			 if(rs.next()) {
+				 pv = new ProdutoVenda(rs.getInt("quantidade"), rs.getInt("fk_codigo"), rs.getFloat("subtotal"));
+			 }
+			 c.desconectar();
+			 
+		 }catch(Exception e) {
+			 System.out.println("Erro na busca"+e.getMessage());
+		 }
+		 return pv;
+	}
+	
+	public void excluir(int fk_codigo, int fk_numero) {
+		try {
+			c.conectar();
+			PreparedStatement instrucao = c.getConexao().prepareStatement(DEL);
+			instrucao.setInt(1, fk_codigo);
+			instrucao.setInt(2, fk_numero);
+			instrucao.execute();
+			c.desconectar();
+		}catch(Exception e) {
+			System.out.println("Erro na exclusão"+e.getMessage());
+		}
 	}
 
 	public void incluir(ProdutoVenda produto, int numero) {
@@ -47,8 +78,8 @@ public class ProdutosVendaDAO {
 			Statement instrucao = c.getConexao().createStatement();
 			ResultSet rs = instrucao.executeQuery(REL);
 			while(rs.next()) {
-				estoque = eDAO.buscar(rs.getInt("codigo"));
-				produto = new ProdutoVenda(estoque.getCodigo(), estoque.getDescricao(), estoque.getPreco(), rs.getInt("qtd"), estoque.getQtdEstoque(), estoque.getF());
+				estoque = eDAO.buscar(rs.getInt("fk_codigo"));
+				produto = new ProdutoVenda(estoque.getCodigo(), estoque.getDescricao(), estoque.getPreco(), rs.getInt("quantidade"), estoque.getQtdEstoque(), estoque.getF());
 				produtos.add(produto);
 			}
 			c.desconectar();

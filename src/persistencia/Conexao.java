@@ -10,10 +10,10 @@ public class Conexao {
 	private String senha;
 	private Connection con;
 	
-	public Conexao(String caminho, String usuario, String senha) {
-		this.caminho = caminho;
-		this.usuario = usuario;
-		this.senha = senha;
+	public Conexao() {
+		this.caminho = "jdbc:postgresql://localhost:5432/mercearia";
+		this.usuario = "postgres";
+		this.senha = "30042003";
 	}
 	
 	public void conectar() {

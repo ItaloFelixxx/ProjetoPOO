@@ -1,23 +1,27 @@
 package dominio;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 public class Venda {
 	private int numero;
 	private Cliente c;
 	private float total;
-	private Date dataVenda;
+	private String dataVenda;
 	private String observacoes;
 	private ArrayList<ProdutoVenda> produtos;
 	
-	public Venda(int numero, Date dataVenda, Cliente c, String observacoes, ArrayList<ProdutoVenda> produtos) {
+	public Venda(int numero, String dataVenda, Cliente c, String observacoes, ArrayList<ProdutoVenda> produtos, float total) {
 		this.c = c; 
 		this.numero = numero;
 		this.dataVenda = dataVenda;
 		this.produtos = produtos;
 		this.observacoes = observacoes;
-		total = 0;
+		this.total = total;
+		
+	}
+	
+	public Venda() {
+		
 	}
 	
 	public int getNumero() {
@@ -31,6 +35,7 @@ public class Venda {
 	public float getTotal() {
 		return total;
 	}
+	
 	public String getObservacoes() {
 		return observacoes;
 	}
@@ -39,22 +44,19 @@ public class Venda {
 		this.observacoes = observacoes;
 	}
 	
-	public void setTotal() {
-		int i;
-		for(i=0; i < produtos.size(); i++) {
-			this.total = this.total + produtos.get(i).getSubtotal();
-		}
+	public void setCliente(Cliente c) {
+		this.c = c;
 	}
 	
 	public Cliente getCliente() {
 		return c;
 	}
 	
-	public Date getDataVenda() { // fazer conversao de tipo para date!
+	public String getDataVenda() { 
 		return dataVenda;
 	}
 	
-	public void setDataVenda(Date dataVenda) {
+	public void setDataVenda(String dataVenda) {
 		this.dataVenda = dataVenda;
 	}
 	
@@ -68,5 +70,11 @@ public class Venda {
 	
 	public int getTamanhoLista() {
 		return produtos.size();
+	}
+	
+	public void setTotal() {
+		for(int i=0; i<produtos.size();i++) {
+			this.total += produtos.get(i).getSubtotal();
+		}
 	}
 }

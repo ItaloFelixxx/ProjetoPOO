@@ -1,6 +1,6 @@
 package persistencia;
 
-import java.sql.Date;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -15,12 +15,24 @@ public class VendaDAO {
 	private String REL = "SELECT * FROM venda";
 	private String BUS = "SELECT * FROM venda WHERE numero = ?";
 	private String INS = "INSERT INTO venda(numero, data_venda,total, observacoes, fk_cpf) VALUES (?,?,?,?,?) "; 
-	private String ALT = "UPDATE venda set numero = ?, total = ?, data_venda = ?, observacoes =?, fk_cpf = ? ";
-
-	
+	private String ALT = "UPDATE venda set numero = ?, total = ?, data_venda = ?, observacoes =?, fk_cpf = ? where numero = ?";
+	private String ALTtotal = "UPDATE venda set total = ? WHERE numero = ?";
 	
 	public VendaDAO() {
-		c = new Conexao("jdbc:postgresql://localhost:5432/mercearia","postgres","30042003");
+		c = new Conexao();
+	}
+	
+	public void alterarTotal(int numero, float total) {
+		try {
+			c.conectar();
+			PreparedStatement instrucao = c.getConexao().prepareStatement(ALTtotal);
+			instrucao.setFloat(1, total);
+			instrucao.setInt(2, numero);
+			instrucao.execute();
+			c.desconectar();
+		}catch(Exception e){
+			System.out.println("Erro ao atualizar total " + e.getMessage());
+		}
 	}
 	
 	public Venda buscar(int numero) {
@@ -38,7 +50,7 @@ public class VendaDAO {
 			 if(rs.next()) {
 				 cliente = cDAO.buscar(rs.getString("fk_cpf"));
 				 produtos = pvDAO.relatorio();
-				 venda = new Venda(rs.getInt("numero"), rs.getDate("data_venda"), cliente, rs.getString("observacoes"), produtos);
+				 venda = new Venda(rs.getInt("numero"), rs.getString("data_venda"), cliente, rs.getString("observacoes"), produtos, rs.getFloat("total"));
 			 }
 			 c.desconectar();
 			 
@@ -56,35 +68,36 @@ public class VendaDAO {
 			c.conectar();
 			PreparedStatement instrucao = c.getConexao().prepareStatement(INS);
 			instrucao.setInt(1, venda.getNumero());
-			instrucao.setDate(2, (Date) venda.getDataVenda());
+			instrucao.setString(2, venda.getDataVenda());
 			instrucao.setFloat(3, venda.getTotal());
 			instrucao.setString(4, venda.getObservacoes());
 			instrucao.setString(5, venda.getCliente().getCpf());
 			instrucao.execute();
 			for(i=0; i<venda.getListaDeProdutos().size(); i++) {
 				pvDAO.incluir(venda.getListaDeProdutos().get(i), venda.getNumero());
-				eDAO.alterarQtd(venda.getListaDeProdutos().get(i).getCodigo(), venda.getListaDeProdutos().get(i).getQtdEstoque(), venda.getListaDeProdutos().get(i).getQuantidade());
-			}
-			
+				eDAO.saidaEstoque(venda.getListaDeProdutos().get(i).getCodigo(), venda.getListaDeProdutos().get(i).getQtdEstoque(), venda.getListaDeProdutos().get(i).getQuantidade());
+			}	
 			c.desconectar();
 		}catch(Exception e){
 			System.out.println("Erro ao inserir venda no sistema" + e.getMessage());
 		}
 	}
 	
-	public void alterar(Venda venda) {
+	public void alterar(Venda venda, int novoNumero) {
 		try {
 			c.conectar();
 			PreparedStatement instrucao = c.getConexao().prepareStatement(ALT);
 			instrucao.setInt(1, venda.getNumero());
-			instrucao.setDate(2, (Date) venda.getDataVenda());
+			instrucao.setString(2, venda.getDataVenda());
 			instrucao.setFloat(3, venda.getTotal());
 			instrucao.setString(4, venda.getObservacoes());
 			instrucao.setString(5, venda.getCliente().getCpf());
+			instrucao.setInt(6, novoNumero);
+
 			instrucao.execute();
 			c.desconectar();
 		}catch(Exception e){
-			System.out.println("Erro ao inserir venda no sistema" + e.getMessage());
+			System.out.println("Erro ao alterar dados da venda " + e.getMessage());
 		}
 	}
 	
@@ -103,7 +116,7 @@ public class VendaDAO {
 			while(rs.next()) {
 				cliente = cDAO.buscar(rs.getString("fk_cpf"));
 				produtos = pvDAO.relatorio();
-				venda = new Venda(rs.getInt("numero"), rs.getDate("data_venda"), cliente, rs.getString("observacoes"), produtos ); //!!!!
+				venda = new Venda(rs.getInt("numero"), rs.getString("data_venda"), cliente, rs.getString("observacoes"), produtos, rs.getFloat("total"));
 				listaVenda.add(venda);
 			}
 			c.desconectar();

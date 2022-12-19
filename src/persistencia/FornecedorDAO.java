@@ -13,11 +13,11 @@ public class FornecedorDAO {
 	private String REL = "SELECT * FROM fornecedor";
 	private String INS = "INSERT INTO fornecedor(cnpj, razao_social,logradouro, numero, telefone, email, complemento, bairro, estado, cidade, cep) VALUES (?,?,?,?,?,?,?,?,?,?,?) "; 
 	private String DEL = "DELETE FROM fornecedor WHERE cnpj = ?";
-	private String ALT = "UPDATE fornecedor cnpj = ?, razao_social = ?, logradouro = ?, numero = ?, telefone = ?, email = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, cep = ? where cnpj = ?";
+	private String ALT = "UPDATE fornecedor set cnpj = ?, razao_social = ?, logradouro = ?, numero = ?, telefone = ?, email = ?, complemento = ?, bairro = ?, cidade = ?, estado = ?, cep = ? where cnpj = ?";
 	private Conexao c;
 	
 	public FornecedorDAO() {
-		c = new Conexao("jdbc:postgresql://localhost:5432/mercearia","postgres","30042003");
+		c = new Conexao();
 	}
 	
 	public Fornecedor buscar(String cnpj) {
@@ -38,7 +38,7 @@ public class FornecedorDAO {
 		 return fornecedor;
 	}
 	
-	public void alterar(Fornecedor fornecedor) {
+	public void alterar(Fornecedor fornecedor, String cnpjAntigo) {
 		try {
 			c.conectar();
 			PreparedStatement instrucao = c.getConexao().prepareStatement(ALT);
@@ -53,7 +53,7 @@ public class FornecedorDAO {
 			instrucao.setString(9, fornecedor.getCidade());
 			instrucao.setString(10, fornecedor.getEstado());
 			instrucao.setString(11, fornecedor.getCep());
-			instrucao.setString(12, fornecedor.getCnpj());
+			instrucao.setString(12, cnpjAntigo);
 			instrucao.execute();
 			c.desconectar();
 		}catch(Exception e){
